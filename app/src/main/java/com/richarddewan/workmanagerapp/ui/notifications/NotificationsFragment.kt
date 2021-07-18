@@ -8,13 +8,18 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.work.*
 import com.richarddewan.workmanagerapp.R
+import com.richarddewan.workmanagerapp.data.work.EmployeeCoroutineWork
+import com.richarddewan.workmanagerapp.data.work.RandomNumberPeriodicWork
 import com.richarddewan.workmanagerapp.databinding.FragmentNotificationsBinding
+import java.util.concurrent.TimeUnit
 
 class NotificationsFragment : Fragment() {
 
     private lateinit var notificationsViewModel: NotificationsViewModel
     private var _binding: FragmentNotificationsBinding? = null
+    private lateinit var workManager: WorkManager
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -24,7 +29,7 @@ class NotificationsFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         notificationsViewModel =
             ViewModelProvider(this).get(NotificationsViewModel::class.java)
 
@@ -36,6 +41,40 @@ class NotificationsFragment : Fragment() {
             textView.text = it
         })
         return root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        /*
+        initialize the work manager
+         */
+        workManager = WorkManager.getInstance(requireContext())
+
+        /*
+        setup a periodic work request to insert data to local DB
+         */
+        periodicWorkRequest()
+    }
+
+    private fun periodicWorkRequest() {
+        /*
+      constraints
+       */
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+
+        /*
+        periodic work request
+         */
+        val randomNumberWork = PeriodicWorkRequest.Builder(
+            EmployeeCoroutineWork::class.java, 15, TimeUnit.MINUTES
+        )
+            .setConstraints(constraints)
+            .build()
+
+        workManager.enqueue(randomNumberWork)
     }
 
     override fun onDestroyView() {
