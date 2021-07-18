@@ -89,6 +89,11 @@ dependencies {
     // optional - Test helpers
     testImplementation("androidx.room:room-testing:$room_version")
 
+    //https://github.com/ReactiveX/RxJava/tree/2.x
+    implementation "io.reactivex.rxjava2:rxjava:$rxJava2_version"
+    //https://github.com/ReactiveX/RxAndroid/tree/2.x
+    implementation "io.reactivex.rxjava2:rxandroid:$rxandroid2_version"
+
 
 
 
