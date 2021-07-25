@@ -10,10 +10,12 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.work.*
 import com.richarddewan.workmanagerapp.R
+import com.richarddewan.workmanagerapp.data.work.DailyWork
 import com.richarddewan.workmanagerapp.data.work.EmployeeCoroutineWork
 import com.richarddewan.workmanagerapp.data.work.RandomNumberPeriodicWork
 import com.richarddewan.workmanagerapp.data.work.UserRxJavaWorker
 import com.richarddewan.workmanagerapp.databinding.FragmentNotificationsBinding
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 class NotificationsFragment : Fragment() {
@@ -60,6 +62,9 @@ class NotificationsFragment : Fragment() {
         RXJava periodic work request
          */
         periodicWorkRequestRxJava()
+
+        //daily work
+        dailyWork()
     }
 
     private fun periodicWorkRequest() {
@@ -104,8 +109,40 @@ class NotificationsFragment : Fragment() {
         workManager.enqueue(workRequest)
     }
 
+    private fun dailyWork(){
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val currentData = Calendar.getInstance()
+        val dueDate = Calendar.getInstance()
+
+        //set time to 8 am
+        dueDate.set(Calendar.HOUR_OF_DAY,12)
+        dueDate.set(Calendar.MINUTE,30)
+        dueDate.set(Calendar.SECOND,0)
+
+        if (dueDate.before(currentData)) {
+            dueDate.add(Calendar.HOUR_OF_DAY,24)
+        }
+
+        val timeDiff =  (dueDate.timeInMillis - currentData.timeInMillis)
+
+        val dailyWorkRequest = OneTimeWorkRequestBuilder<DailyWork>()
+            .setConstraints(constraints)
+            .setInitialDelay(timeDiff, TimeUnit.MILLISECONDS)
+            .addTag(TAG)
+            .build()
+
+        workManager.enqueue(dailyWorkRequest)
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    companion object {
+        const val TAG = "NotificationsFragment"
     }
 }
