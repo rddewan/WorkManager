@@ -32,8 +32,17 @@ class WorkManagerApp: Application() {
                     description = "This is a DailyWork notification channel"
             }
 
+            val longNotification = NotificationChannel(
+                "ch01",
+                "Long Running Task",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "This is a long running work manager task"
+            }
+
             val notificationManager = getSystemService(NotificationManager::class.java)
             notificationManager.createNotificationChannel(notificationChannel)
+            notificationManager.createNotificationChannel(longNotification)
         }
     }
 }

@@ -10,10 +10,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.work.*
 import com.richarddewan.workmanagerapp.R
-import com.richarddewan.workmanagerapp.data.work.DailyWork
-import com.richarddewan.workmanagerapp.data.work.EmployeeCoroutineWork
-import com.richarddewan.workmanagerapp.data.work.RandomNumberPeriodicWork
-import com.richarddewan.workmanagerapp.data.work.UserRxJavaWorker
+import com.richarddewan.workmanagerapp.data.work.*
 import com.richarddewan.workmanagerapp.databinding.FragmentNotificationsBinding
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -65,6 +62,10 @@ class NotificationsFragment : Fragment() {
 
         //daily work
         dailyWork()
+
+        binding.btnLongTask.setOnClickListener {
+            longWork()
+        }
     }
 
     private fun periodicWorkRequest() {
@@ -135,6 +136,18 @@ class NotificationsFragment : Fragment() {
             .build()
 
         workManager.enqueue(dailyWorkRequest)
+    }
+
+    private fun longWork(){
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val request = OneTimeWorkRequestBuilder<ForegroundWork>()
+            .setConstraints(constraints)
+            .build()
+
+        workManager.enqueue(request)
     }
 
     override fun onDestroyView() {
